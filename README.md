@@ -13,7 +13,7 @@ A PowerShell script to optimize privacy settings in Windows 11.
 
 Open PowerShell as administrator and run the following command:
 
-irm https://raw.githubusercontent.com/HerrTaeubler/Win11-privacy-tool/main/Win11-privacy-tool.ps1 | iex
+```irm https://raw.githubusercontent.com/HerrTaeubler/Win11-privacy-tool/main/Win11-privacy-tool.ps1 | iex```
 
 ## Functions
 
