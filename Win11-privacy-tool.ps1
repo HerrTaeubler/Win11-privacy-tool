@@ -382,7 +382,7 @@ function Show-Menu {
         6 = "Exit"
     }
     
-    Write-Host "`nWindows 11 Privacy Optimization`n" -ForegroundColor Cyan
+    Write-Host "`nWin11-privacy-tool`n" -ForegroundColor Cyan
     foreach ($key in $options.Keys | Sort-Object) {
         Write-Host "[$key] $($options[$key])"
     }
