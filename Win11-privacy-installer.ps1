@@ -5,7 +5,7 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 }
 
 # Download and execute script from GitHub
-$scriptUrl = "https://raw.githubusercontent.com/HerrTauebler/Win11-privacy-tool/main/Win11-privacy-tool.ps1
+$scriptUrl = "https://raw.githubusercontent.com/HerrTaeubler/Win11-privacy-tool/main/Win11-privacy-tool.ps1
 
 try {
     $script = (Invoke-RestMethod -Uri $scriptUrl -UseBasicParsing)
