@@ -70,7 +70,7 @@ Herr Täubler
 
 ## Disclaimer
 
-Use this script at your own risk. While efforts have been made to ensure safe operation, the author is not responsible for any potential issues that may arise from using this script.
+Use this script at your own risk. While efforts have been made to ensure safe operation, i am not responsible for any potential issues that may arise from using this script.
 
 ## Contributing
 
