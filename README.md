@@ -1,4 +1,6 @@
-# Windows 11 Privacy Optimizer
+# Windows 11 Privacy Optimizer   
+
+![License: MIT](https://img.shields.io/github/license/HerrTaeubler/Win11-privacy-tool)
 
 A PowerShell script to optimize privacy settings in Windows 11.
 
