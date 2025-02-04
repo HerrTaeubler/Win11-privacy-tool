@@ -1,3 +1,4 @@
+
 # Windows 11 Privacy Optimization
 # Run as Administrator
 
@@ -257,13 +258,58 @@ function Set-WindowsPrivacy {
     Set-RegistryValueWithBackup -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' `
         -Name 'SubscribedContent-338393Enabled' -Value 0 `
         -Description "Disable Suggested Content in Settings"
+       
+    # Disable Search Highlights
+    Set-RegistryValueWithBackup -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\SearchSettings' `
+        -Name 'IsDynamicSearchBoxEnabled' -Value 0 `
+        -Description "Disable Search Highlights"
 
-    # Disable Suggested Content in Windows Spotlight
+    # Disable MS Teams Icon
+    Set-RegistryValueWithBackup -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' `
+        -Name 'TaskbarMn' -Value 0 `
+        -Description "Disable Chat Icon"
+
+     # Disable Bing Search in Start Menu
+    Set-RegistryValueWithBackup -Path 'HKCU:\Software\Policies\Microsoft\Windows\Explorer' `
+        -Name 'DisableSearchBoxSuggestions' -Value 1 `
+        -Description "Disable Bing Search in Start Menu"
+
+    # Disable Windows Widget Service
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Dsh' `
+        -Name 'AllowNewsAndInterests' -Value 0 `
+        -Description "Disable Windows Widget Service"
+
+    # Disable Microsoft Account Sign-in Assistant
+    Set-RegistryValueWithBackup -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\wlidsvc' `
+        -Name 'Start' -Value 4 `
+        -Description "Disable Microsoft Account Sign-in Service"
+
+    # Disable Windows Error Reporting
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting' `
+        -Name 'Disabled' -Value 1 `
+        -Description "Disable Windows Error Reporting"
+ 
+    # Disable Device Census
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Metadata' `
+        -Name 'PreventDeviceMetadataFromNetwork' -Value 1 `
+        -Description "Disable Device Metadata Collection"
+
+    # Disable Microsoft Store Auto Install
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore' `
+        -Name 'AutoDownload' -Value 2 `
+        -Description "Disable Automatic Store Updates"
+
+    # Disable Windows Welcome Experience
+    Set-RegistryValueWithBackup -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' `
+        -Name 'SubscribedContent-310093Enabled' -Value 0 `
+        -Description "Disable Welcome Experience"
+
+    # Disable Windows Spotlight
     Set-RegistryValueWithBackup -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' `
         -Name 'SubscribedContent-338387Enabled' -Value 0 `
-        -Description "Disable Windows Spotlight Content"
+        -Description "Disable Windows Spotlight"
+     
 }
-
 # Windows Update Delivery Optimization Configuration
 function Set-DeliveryOptimization {
     Write-Log "Configuring Windows Update Delivery Optimization..." -Level 'Info'
