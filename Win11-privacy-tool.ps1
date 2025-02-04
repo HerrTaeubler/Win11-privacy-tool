@@ -1,4 +1,5 @@
 
+
 # Windows 11 Privacy Optimization
 # Run as Administrator
 
@@ -58,6 +59,35 @@ function Test-PrivacyFeatureAvailability {
         return $true
     } else {
         Write-Log "Some privacy features might not be available on this Windows version" -Level 'Warning'
+        return $false
+    }
+}
+
+# System Restore Point
+function New-SystemRestorePoint {
+    Write-Log "Creating System Restore Point..." -Level 'Info'
+    
+    try {
+        # Load the System.Management.Automation.dll assembly
+        $null = [System.Reflection.Assembly]::LoadWithPartialName("System.Management.Automation")
+        
+        # Enable System Restore if not already enabled
+        Enable-ComputerRestore -Drive "C:\" -ErrorAction SilentlyContinue
+        
+        # Create the restore point
+        $restorePoint = @{
+            Description = "Windows 11 Privacy Settings Backup"
+            RestorePointType = "MODIFY_SETTINGS"
+        }
+        
+        $null = Checkpoint-Computer @restorePoint -ErrorAction Stop
+        
+        Write-Log "System Restore Point created successfully" -Level 'Info'
+        return $true
+    }
+    catch {
+        Write-Log "Error creating System Restore Point: $($_.Exception.Message)" -Level 'Error'
+        Write-Log "Please ensure System Restore is enabled in System Properties" -Level 'Warning'
         return $false
     }
 }
@@ -423,7 +453,7 @@ function Show-Menu {
         2 = "Enable Hosts File Blocking"
         3 = "Optimize Windows Privacy Settings"
         4 = "Run All Optimizations"
-        5 = "Revert Changes"
+        5 = "Revert Changes (current session only - will be lost after closing)"
         6 = "Exit"
     }
     
@@ -433,6 +463,19 @@ function Show-Menu {
     }
     
     $choice = Read-Host "`nSelect an option (1-6)"
+    
+    if ($choice -in @('3','4')) {
+        $createRestorePoint = Read-Host "Create system restore point before making changes? (y/N)"
+        if ($createRestorePoint -eq 'y') {
+            if (-not (New-SystemRestorePoint)) {
+                $proceed = Read-Host "Failed to create restore point. Continue anyway? (y/N)"
+                if ($proceed -ne 'y') {
+                    return $null
+                }
+            }
+        }
+    }
+    
     return $choice
 }
 
@@ -522,12 +565,22 @@ $domains = @(
 
 do {
     $choice = Show-Menu
+    
+    # Wenn Show-Menu null zurückgibt (Benutzer möchte nicht ohne Wiederherstellungspunkt fortfahren)
+    if ($null -eq $choice) {
+        continue
+    }
+
     switch ($choice) {
-        1 { Set-DeliveryOptimization }
-        2 { Update-HostsFile -BlockDomains $domains }
+        1 { 
+            Set-DeliveryOptimization 
+        }
+        2 { 
+            Update-HostsFile -BlockDomains $domains 
+        }
         3 { 
             $featureAvailability = Test-PrivacyFeatureAvailability -Compatibility $compatibility
-            Set-WindowsPrivacy 
+            Set-WindowsPrivacy
         }
         4 {
             Write-Log "Running all optimizations..." -Level 'Info'
