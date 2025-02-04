@@ -4,6 +4,9 @@
 
 A PowerShell script to optimize privacy settings in Windows 11.
 
+This tool aims to restrict Windows' data collection and telemetry as much as possible while maintaining system stability and functionality. 
+It provides a balanced approach between privacy and usability, ensuring Windows remains fully operational while minimizing unnecessary data transmission.
+
 ## Features
 
 - Restriction of Windows Update Delivery Optimization
@@ -52,7 +55,11 @@ Open PowerShell as administrator and run the following command:
    - Automatic system compatibility check
    - Detailed logging of all changes
    - Easy restore functionality
-   - User-friendly interface
+
+## Roadmap
+- [ ] GUI implementation (in progress)
+- [ ] Enhanced logging features
+- [ ] Additional privacy controls
 
 ## Security
 
