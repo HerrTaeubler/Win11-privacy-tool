@@ -118,7 +118,7 @@ function Set-WindowsPrivacy {
         -Name 'MaxTelemetryAllowed' -Value 0 `
         -Description "Set Maximum Telemetry Level to Security"
 
-    # 24H2 Specific Telemetry Settings
+    # Basic Telemetry Settings
     Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection' `
         -Name 'DisableEnterpriseAuthProxy' -Value 1 `
         -Description "Disable Enterprise Authentication for Telemetry"
