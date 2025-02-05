@@ -646,6 +646,8 @@ function Show-Menu {
     Write-Host "[6] Revert Changes" -ForegroundColor White
     Write-Host "[7] Exit" -ForegroundColor White
     Write-Host
+    Write-Host "Created by Herr Täubler" -ForegroundColor Magenta
+    Write-Host 
     
     Write-Host "Select an option (1-7): " -ForegroundColor White -NoNewline
     $choice = Read-Host
