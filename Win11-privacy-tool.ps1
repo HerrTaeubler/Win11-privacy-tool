@@ -613,7 +613,7 @@ function Show-Menu {
         Write-Host "[$key] $($options[$key])"
     }
     
-    $choice = Read-Host "`nSelect an option (1-6)"
+    $choice = Read-Host "`nSelect an option (1-7)"
     
     if ($choice -in @('3','4','5')) {
         $createRestorePoint = Read-Host "Create system restore point before making changes? (y/N)"
