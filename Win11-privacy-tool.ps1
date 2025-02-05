@@ -335,6 +335,45 @@ function Set-WindowsPrivacy {
     Set-RegistryValueWithBackup -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' `
         -Name 'SubscribedContent-338387Enabled' -Value 0 `
         -Description "Disable Windows Spotlight"
+
+        # Disable Inking & Typing Personalization
+    Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\InputPersonalization' `
+        -Name 'RestrictImplicitInkCollection' -Value 1 `
+        -Description "Disable Implicit Ink Collection"
+    
+    Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\InputPersonalization' `
+        -Name 'RestrictImplicitTextCollection' -Value 1 `
+        -Description "Disable Implicit Text Collection"
+
+    Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\InputPersonalization\TrainedDataStore' `
+        -Name 'HarvestContacts' -Value 0 `
+        -Description "Disable Contact Harvesting"
+
+    Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\Personalization\Settings' `
+        -Name 'AcceptedPrivacyPolicy' -Value 0 `
+        -Description "Disable Personalization Privacy Policy"
+
+    # Disable language list access for websites
+    Set-RegistryValueWithBackup -Path 'HKCU:\Control Panel\International\User Profile' `
+        -Name 'HttpAcceptLanguageOptOut' -Value 1 `
+        -Description "Disable language list access for websites"
+
+    Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\LanguageConfiguration' `
+        -Name 'DisableLanguageListAccess' -Value 1 `
+        -Description "Disable language configuration access"
+       
+    # Disable suggested content in Settings app
+    Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' `
+        -Name 'SubscribedContent-338393Enabled' -Value 0 `
+        -Description "Disable suggested content in Settings app"
+
+    Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' `
+        -Name 'SubscribedContent-353694Enabled' -Value 0 `
+        -Description "Disable suggestions in Settings"
+
+    Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' `
+        -Name 'SubscribedContent-353696Enabled' -Value 0 `
+        Description "Disable additional suggestions"
      
 }
 # Windows Update Delivery Optimization Configuration
