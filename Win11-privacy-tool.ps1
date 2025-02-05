@@ -1,5 +1,3 @@
-
-
 # Windows 11 Privacy Optimization
 # Run as Administrator
 
@@ -565,8 +563,8 @@ $domains = @(
 
 do {
     $choice = Show-Menu
-    
-    # Wenn Show-Menu null zurückgibt (Benutzer möchte nicht ohne Wiederherstellungspunkt fortfahren)
+  
+
     if ($null -eq $choice) {
         continue
     }
