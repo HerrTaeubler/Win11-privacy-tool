@@ -53,7 +53,7 @@ function Test-PrivacyFeatureAvailability {
     )
 
     if ($Compatibility.Is24H2) {
-        Write-Log "Windows 11 24H2 detected - All privacy features are available" -Level 'Info'
+        Write-Log "Windows 11 detected - All privacy features are available" -Level 'Info'
         return $true
     } else {
         Write-Log "Some privacy features might not be available on this Windows version" -Level 'Warning'
@@ -204,16 +204,36 @@ function Set-WindowsPrivacy {
     Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System' `
         -Name 'PublishUserActivities' -Value 0 `
         -Description "Disable Activity Publishing"
+    
+    # Windows Search Privacy Settings
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search' `
+        -Name 'AllowCortana' -Value 0 `
+        -Description "Disable Cortana in Windows Search"
 
-    # Disable Web Search
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search' `
+        -Name 'ConnectedSearchUseWeb' -Value 0 `
+        -Description "Disable web search results"
+
     Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search' `
         -Name 'DisableWebSearch' -Value 1 `
-        -Description "Disable Web Search"
+        -Description "Disable web search capability"
 
-    # Disable Remote Assistance
-    Set-RegistryValueWithBackup -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Remote Assistance' `
-        -Name 'fAllowToGetHelp' -Value 0 `
-        -Description "Disable Remote Assistance"
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search' `
+        -Name 'AllowSearchToUseLocation' -Value 0 `
+        -Description "Disable location in search"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search' `
+        -Name 'AllowCloudSearch' -Value 0 `
+        -Description "Disable cloud search"
+
+    Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\SearchSettings' `
+        -Name 'IsDeviceSearchHistoryEnabled' -Value 0 `
+        -Description "Disable search history"
+
+    # Disable SafeSearch
+    Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\SearchSettings' `
+        -Name 'SafeSearchMode' -Value 0 `
+        -Description "Disable SafeSearch"
 
     # Disable AutoPlay and AutoRun
     Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer' `
@@ -249,9 +269,7 @@ function Set-WindowsPrivacy {
     Set-RegistryValueWithBackup -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NlaSvc\Parameters\Internet' `
         -Name 'EnableActiveProbing' -Value 0 `
         -Description "Disable Network Location Awareness"
-
-    Write-Log "Windows privacy settings configuration completed" -Level 'Info'
-
+  
     # Disable Windows Tips and Suggestions
     Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent' `
         -Name 'DisableSoftLanding' -Value 1 `
@@ -335,6 +353,100 @@ function Set-WindowsPrivacy {
     Set-RegistryValueWithBackup -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' `
         -Name 'SubscribedContent-338387Enabled' -Value 0 `
         -Description "Disable Windows Spotlight"
+
+    # Disable Inking & Typing Personalization
+    Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\InputPersonalization' `
+        -Name 'RestrictImplicitInkCollection' -Value 1 `
+        -Description "Disable Implicit Ink Collection"
+    
+    Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\InputPersonalization' `
+        -Name 'RestrictImplicitTextCollection' -Value 1 `
+        -Description "Disable Implicit Text Collection"
+
+    Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\InputPersonalization\TrainedDataStore' `
+        -Name 'HarvestContacts' -Value 0 `
+        -Description "Disable Contact Harvesting"
+
+    Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\Personalization\Settings' `
+        -Name 'AcceptedPrivacyPolicy' -Value 0 `
+        -Description "Disable Personalization Privacy Policy"
+
+    # Disable language list access for websites
+    Set-RegistryValueWithBackup -Path 'HKCU:\Control Panel\International\User Profile' `
+        -Name 'HttpAcceptLanguageOptOut' -Value 1 `
+        -Description "Disable language list access for websites"
+
+    Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\LanguageConfiguration' `
+        -Name 'DisableLanguageListAccess' -Value 1 `
+        -Description "Disable language configuration access"
+       
+    # Disable suggested content in Settings app
+    Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' `
+        -Name 'SubscribedContent-338393Enabled' -Value 0 `
+        -Description "Disable suggested content in Settings app"
+
+    Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' `
+        -Name 'SubscribedContent-353694Enabled' -Value 0 `
+        -Description "Disable suggestions in Settings"
+
+    Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' `
+        -Name 'SubscribedContent-353696Enabled' -Value 0 `
+        Description "Disable additional suggestions"
+
+        # App Permissions Privacy Settings
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\microphone' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Microphone Access by Default"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\webcam' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Camera Access by Default"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\userAccountInformation' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Account Info Access"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\contacts' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Contacts Access"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\appointments' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Calendar Access"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\phoneCall' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Phone Call Access"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\radios' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Radios Access"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\bluetoothSync' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Bluetooth Access"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\broadFileSystemAccess' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Broad File System Access"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\documentsLibrary' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Documents Library Access"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\picturesLibrary' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Pictures Library Access"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\videosLibrary' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Videos Library Access"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\musicLibrary' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Music Library Access"
+
+    Write-Log "Windows privacy settings configuration completed" -Level 'Info'        
      
 }
 # Windows Update Delivery Optimization Configuration
@@ -564,7 +676,6 @@ $domains = @(
 do {
     $choice = Show-Menu
   
-
     if ($null -eq $choice) {
         continue
     }
@@ -574,7 +685,34 @@ do {
             Set-DeliveryOptimization 
         }
         2 { 
-            Update-HostsFile -BlockDomains $domains 
+            Write-Log "Starting hosts file modification..." -Level 'Info'
+            $currentHostsContent = Get-Content "$env:SystemRoot\System32\drivers\etc\hosts" -ErrorAction SilentlyContinue
+            
+            if ($currentHostsContent) {
+                Write-Log "Current hosts file contains $($currentHostsContent.Count) lines" -Level 'Info'
+                $proceed = Read-Host "Current hosts file will be modified. Continue? (y/N)"
+                
+                if ($proceed -eq 'y') {
+                    if (Update-HostsFile -BlockDomains $domains) {
+                        Write-Log "Hosts file successfully updated" -Level 'Info'
+                    } else {
+                        Write-Log "Failed to update hosts file" -Level 'Error'
+                    }
+                } else {
+                    Write-Log "Hosts file modification cancelled by user" -Level 'Info'
+                }
+            } else {
+                Write-Log "No existing hosts file found or access denied" -Level 'Warning'
+                $proceed = Read-Host "Create new hosts file? (y/N)"
+                
+                if ($proceed -eq 'y') {
+                    if (Update-HostsFile -BlockDomains $domains) {
+                        Write-Log "New hosts file created successfully" -Level 'Info'
+                    } else {
+                        Write-Log "Failed to create hosts file" -Level 'Error'
+                    }
+                }
+            }
         }
         3 { 
             $featureAvailability = Test-PrivacyFeatureAvailability -Compatibility $compatibility
