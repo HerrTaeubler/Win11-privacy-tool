@@ -397,6 +397,13 @@ function Set-WindowsPrivacy {
     Set-RegistryValueWithBackup -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\SystemSettings\AccountNotifications' `
         -Name 'EnableAccountNotifications' -Value 0 `
         -Description "Disable Settings App Notifications"
+        
+    Write-Log "Windows privacy settings configuration completed" -Level 'Info'        
+     
+}   
+
+function Set-AppPermissions {
+    Write-Log "Configuring Windows privacy settings..." -Level 'Info'
 
     # App Permissions Privacy Settings
     Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\microphone' `
@@ -595,9 +602,10 @@ function Show-Menu {
         1 = "Restrict Windows Update Delivery Optimization"
         2 = "Enable Hosts File Blocking"
         3 = "Optimize Windows Privacy Settings"
-        4 = "Run All Optimizations"
-        5 = "Revert Changes (current session only - will be lost after closing)"
-        6 = "Exit"
+        4 = "Configure App Permissions" 
+        5 = "Run All Optimizations"
+        6 = "Revert Changes"
+        7 = "Exit"
     }
     
     Write-Host "`nWin11-privacy-tool`n" -ForegroundColor Cyan
@@ -607,10 +615,11 @@ function Show-Menu {
     
     $choice = Read-Host "`nSelect an option (1-6)"
     
-    if ($choice -in @('3','4')) {
+    if ($choice -in @('3','4','5')) {
         $createRestorePoint = Read-Host "Create system restore point before making changes? (y/N)"
         if ($createRestorePoint -eq 'y') {
             if (-not (New-SystemRestorePoint)) {
+
                 $proceed = Read-Host "Failed to create restore point. Continue anyway? (y/N)"
                 if ($proceed -ne 'y') {
                     return $null
@@ -751,14 +760,19 @@ do {
             $featureAvailability = Test-PrivacyFeatureAvailability -Compatibility $compatibility
             Set-WindowsPrivacy
         }
-        4 {
+        4 { 
+            Set-AppPermissions
+        
+        }
+        5 {
             Write-Log "Running all optimizations..." -Level 'Info'
             $featureAvailability = Test-PrivacyFeatureAvailability -Compatibility $compatibility
             Set-DeliveryOptimization
             Set-WindowsPrivacy
+            Set-AppPermissions
             Update-HostsFile -BlockDomains $domains
         }
-        5 {
+        6 {
             Write-Log "Restoring backup values..." -Level 'Info'
             foreach ($backup in $script:registryBackups) {
                 Set-ItemProperty -Path $backup.Path -Name $backup.Name -Value $backup.Value
@@ -769,7 +783,7 @@ do {
                 Write-Log "Hosts file restored from backup" -Level 'Info'
             }
         }
-        6 {
+        7 {
             Write-Log "Program terminated" -Level 'Info'
             exit
         }
@@ -778,8 +792,8 @@ do {
         }
     }
     
-    if ($choice -ne 6) {
+    if ($choice -ne 7) {
         Write-Host "`nPress any key to continue..."
         $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
     }
-} while ($choice -ne 6)
+} while ($choice -ne 7)
