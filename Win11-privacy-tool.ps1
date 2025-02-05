@@ -643,7 +643,8 @@ function Show-Menu {
     Write-Host "[3] Optimize Windows Privacy Settings" -ForegroundColor White
     Write-Host "[4] Configure App Permissions" -ForegroundColor White
     Write-Host "[5] Run All Optimizations" -ForegroundColor White
-    Write-Host "[6] Revert Changes" -ForegroundColor White
+    Write-Host "[6] Revert Changes (Current Session Only)" -ForegroundColor White
+    Write-Host "    └─ Only reverts changes made in this session" -ForegroundColor Yellow
     Write-Host "[7] Exit" -ForegroundColor White
     Write-Host
     Write-Host "Created by Herr Täubler" -ForegroundColor DarkCyan
