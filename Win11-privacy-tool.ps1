@@ -451,6 +451,34 @@ function Set-WindowsPrivacy {
         -Name 'Value' -Value 'Deny' `
         -Description "Disable Music Library Access"
 
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\email' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Email Access by Default"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\userDataTasks' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Tasks Access by Default"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\chat' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Messaging/Chat Access"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\downloadsFolder' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Downloads Folder Access"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\graphicsCaptureProgrammatic' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Screen Capture Access"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\graphicsCaptureWithoutBorder' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Borderless Screen Capture"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\screenshot' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Screenshot Capability"   
+
     Write-Log "Windows privacy settings configuration completed" -Level 'Info'        
      
 }
