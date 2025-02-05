@@ -11,7 +11,7 @@ This tool aims to restrict Windows' data collection and telemetry as much as pos
 - Blocking of telemetry and tracking domains via hosts file
 - Comprehensive Windows privacy settings optimization
 - Enhanced Windows Search privacy controls
-- App permissions management
+- Dedicated App Permissions Management
 - Backup and restore functionality for all changes
 - Detailed logging system
 
@@ -49,7 +49,6 @@ Open PowerShell as administrator and run the following command:
 - Disables advertising ID
 - Controls Windows Search privacy
 - Manages app permissions
-- Disables Cortana
 - Controls cloud sync settings
 - Manages Windows Hello settings
 - Controls Timeline and activity history
@@ -58,7 +57,22 @@ Open PowerShell as administrator and run the following command:
 - Controls clipboard history
 - Manages language settings
 - Controls content delivery
-- Manages app permissions (camera, microphone, etc.)
+
+
+### App Permissions Management
+- Microphone access
+- Camera access
+- Account information access
+- Contacts access
+- Calendar access
+- Phone call access
+- Radio/Bluetooth access
+- File system access
+- Documents/Pictures/Videos/Music library access
+- Email and Tasks access
+- Chat/Messaging access
+- Downloads folder access
+- Screen capture and Screenshot capabilities
 
 ### Additional Features
 - Automatic system compatibility check
