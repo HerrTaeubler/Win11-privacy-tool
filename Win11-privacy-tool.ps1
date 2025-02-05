@@ -53,7 +53,7 @@ function Test-PrivacyFeatureAvailability {
     )
 
     if ($Compatibility.Is24H2) {
-        Write-Log "Windows 11 24H2 detected - All privacy features are available" -Level 'Info'
+        Write-Log "Windows 11 detected - All privacy features are available" -Level 'Info'
         return $true
     } else {
         Write-Log "Some privacy features might not be available on this Windows version" -Level 'Warning'
@@ -564,7 +564,6 @@ $domains = @(
 do {
     $choice = Show-Menu
   
-
     if ($null -eq $choice) {
         continue
     }
@@ -574,7 +573,34 @@ do {
             Set-DeliveryOptimization 
         }
         2 { 
-            Update-HostsFile -BlockDomains $domains 
+            Write-Log "Starting hosts file modification..." -Level 'Info'
+            $currentHostsContent = Get-Content "$env:SystemRoot\System32\drivers\etc\hosts" -ErrorAction SilentlyContinue
+            
+            if ($currentHostsContent) {
+                Write-Log "Current hosts file contains $($currentHostsContent.Count) lines" -Level 'Info'
+                $proceed = Read-Host "Current hosts file will be modified. Continue? (y/N)"
+                
+                if ($proceed -eq 'y') {
+                    if (Update-HostsFile -BlockDomains $domains) {
+                        Write-Log "Hosts file successfully updated" -Level 'Info'
+                    } else {
+                        Write-Log "Failed to update hosts file" -Level 'Error'
+                    }
+                } else {
+                    Write-Log "Hosts file modification cancelled by user" -Level 'Info'
+                }
+            } else {
+                Write-Log "No existing hosts file found or access denied" -Level 'Warning'
+                $proceed = Read-Host "Create new hosts file? (y/N)"
+                
+                if ($proceed -eq 'y') {
+                    if (Update-HostsFile -BlockDomains $domains) {
+                        Write-Log "New hosts file created successfully" -Level 'Info'
+                    } else {
+                        Write-Log "Failed to create hosts file" -Level 'Error'
+                    }
+                }
+            }
         }
         3 { 
             $featureAvailability = Test-PrivacyFeatureAvailability -Compatibility $compatibility
