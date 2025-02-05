@@ -210,10 +210,30 @@ function Set-WindowsPrivacy {
         -Name 'DisableWebSearch' -Value 1 `
         -Description "Disable Web Search"
 
-    # Disable Remote Assistance
-    Set-RegistryValueWithBackup -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Remote Assistance' `
-        -Name 'fAllowToGetHelp' -Value 0 `
-        -Description "Disable Remote Assistance"
+    # Windows Search Privacy Settings
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search' `
+        -Name 'AllowCortana' -Value 0 `
+        -Description "Disable Cortana in Windows Search"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search' `
+        -Name 'ConnectedSearchUseWeb' -Value 0 `
+        -Description "Disable web search results"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search' `
+        -Name 'DisableWebSearch' -Value 1 `
+        -Description "Disable web search capability"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search' `
+        -Name 'AllowSearchToUseLocation' -Value 0 `
+        -Description "Disable location in search"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search' `
+        -Name 'AllowCloudSearch' -Value 0 `
+        -Description "Disable cloud search"
+
+    Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\SearchSettings' `
+        -Name 'IsDeviceSearchHistoryEnabled' -Value 0 `
+        -Description "Disable search history"
 
     # Disable AutoPlay and AutoRun
     Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer' `
