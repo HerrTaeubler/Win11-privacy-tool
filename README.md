@@ -23,7 +23,8 @@ Open PowerShell as administrator and run the following command:
 ## Functions
 
 - Automatic detection of Windows version
-- Backup of all changes
+- Backup of all changes (current session)
+- Optional System Restore Point creation before applying changes (user prompt)
 - User-friendly menu
 - Detailed logging function
 
