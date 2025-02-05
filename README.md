@@ -20,7 +20,6 @@ Open PowerShell as administrator and run the following command:
 
 ```irm https://raw.githubusercontent.com/HerrTaeubler/Win11-privacy-tool/main/Win11-privacy-tool.ps1 | iex```
 
-
 ## Functions
 - Automatic detection of Windows version and build
 - Backup of all changes (current session)
@@ -79,12 +78,6 @@ Open PowerShell as administrator and run the following command:
 - Detailed logging of all changes
 - Easy restore functionality
 - Build-specific optimizations
-
-## Roadmap
-- [ ] GUI implementation (in progress)
-- [ ] Enhanced logging features
-- [ ] Additional privacy controls
-
 
 ## Security
 The script automatically creates backups of all changes and allows for easy restoration through:
