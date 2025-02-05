@@ -597,29 +597,62 @@ function Update-HostsFile {
 }
 
 # Interactive Menu
+function Write-Log {
+    param(
+        [string]$Message,
+        [ValidateSet('Info', 'Warning', 'Error')]
+        [string]$Level = 'Info'
+    )
+    
+    $logFolder = "C:\Windows\Logs\PrivacyOptimizer"
+    $logFile = Join-Path $logFolder "privacy_$(Get-Date -Format 'yyyyMMdd').log"
+    $timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
+    
+    if (-not (Test-Path $logFolder)) {
+        New-Item -ItemType Directory -Path $logFolder -Force | Out-Null
+    }
+    
+    $logMessage = "[$timestamp] [$Level] $Message"
+    Add-Content -Path $logFile -Value $logMessage
+    
+    # Console output with colors and symbols
+    $symbol = switch ($Level) {
+        'Info'    { ">" }
+        'Warning' { "!" }
+        'Error'   { "x" }
+    }
+    
+    $color = switch ($Level) {
+        'Info'    { 'Cyan' }
+        'Warning' { 'Yellow' }
+        'Error'   { 'Red' }
+    }
+    
+    Write-Host $symbol -ForegroundColor $color -NoNewline
+    Write-Host " $Message"
+}
+
 function Show-Menu {
-    $options = @{
-        1 = "Restrict Windows Update Delivery Optimization"
-        2 = "Enable Hosts File Blocking"
-        3 = "Optimize Windows Privacy Settings"
-        4 = "Configure App Permissions" 
-        5 = "Run All Optimizations"
-        6 = "Revert Changes"
-        7 = "Exit"
-    }
+    Clear-Host
+    Write-Host "===========================================" -ForegroundColor Cyan
+    Write-Host "         Windows 11 Privacy Tool          " -ForegroundColor Cyan
+    Write-Host "===========================================" -ForegroundColor Cyan
+    Write-Host
+    Write-Host "[1] Restrict Windows Update Delivery Optimization" -ForegroundColor White
+    Write-Host "[2] Enable Hosts File Blocking" -ForegroundColor White
+    Write-Host "[3] Optimize Windows Privacy Settings" -ForegroundColor White
+    Write-Host "[4] Configure App Permissions" -ForegroundColor White
+    Write-Host "[5] Run All Optimizations" -ForegroundColor White
+    Write-Host "[6] Revert Changes" -ForegroundColor White
+    Write-Host "[7] Exit" -ForegroundColor White
+    Write-Host
     
-    Write-Host "`nWin11-privacy-tool`n" -ForegroundColor Cyan
-    foreach ($key in $options.Keys | Sort-Object) {
-        Write-Host "[$key] $($options[$key])"
-    }
-    
-    $choice = Read-Host "`nSelect an option (1-7)"
+    $choice = Read-Host "Select an option (1-7)"
     
     if ($choice -in @('3','4','5')) {
         $createRestorePoint = Read-Host "Create system restore point before making changes? (y/N)"
         if ($createRestorePoint -eq 'y') {
             if (-not (New-SystemRestorePoint)) {
-
                 $proceed = Read-Host "Failed to create restore point. Continue anyway? (y/N)"
                 if ($proceed -ne 'y') {
                     return $null
@@ -762,7 +795,6 @@ do {
         }
         4 { 
             Set-AppPermissions
-        
         }
         5 {
             Write-Log "Running all optimizations..." -Level 'Info'
@@ -793,7 +825,10 @@ do {
     }
     
     if ($choice -ne 7) {
-        Write-Host "`nPress any key to continue..."
-        $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+        Write-Host
+        Write-Host "===========================================" -ForegroundColor Yellow
+        Write-Host "    Press any key to return to menu...    " -ForegroundColor Green
+        Write-Host "===========================================" -ForegroundColor Yellow
+        $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
     }
 } while ($choice -ne 7)
