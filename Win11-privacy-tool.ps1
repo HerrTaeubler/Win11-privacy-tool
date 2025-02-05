@@ -204,12 +204,7 @@ function Set-WindowsPrivacy {
     Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System' `
         -Name 'PublishUserActivities' -Value 0 `
         -Description "Disable Activity Publishing"
-
-    # Disable Web Search
-    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search' `
-        -Name 'DisableWebSearch' -Value 1 `
-        -Description "Disable Web Search"
-
+    
     # Windows Search Privacy Settings
     Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search' `
         -Name 'AllowCortana' -Value 0 `
@@ -234,6 +229,11 @@ function Set-WindowsPrivacy {
     Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\SearchSettings' `
         -Name 'IsDeviceSearchHistoryEnabled' -Value 0 `
         -Description "Disable search history"
+
+    # Disable SafeSearch
+    Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\SearchSettings' `
+        -Name 'SafeSearchMode' -Value 0 `
+        -Description "Disable SafeSearch"
 
     # Disable AutoPlay and AutoRun
     Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer' `
@@ -356,7 +356,7 @@ function Set-WindowsPrivacy {
         -Name 'SubscribedContent-338387Enabled' -Value 0 `
         -Description "Disable Windows Spotlight"
 
-        # Disable Inking & Typing Personalization
+    # Disable Inking & Typing Personalization
     Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\InputPersonalization' `
         -Name 'RestrictImplicitInkCollection' -Value 1 `
         -Description "Disable Implicit Ink Collection"
