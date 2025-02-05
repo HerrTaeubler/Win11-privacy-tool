@@ -647,7 +647,7 @@ function Show-Menu {
     Write-Host "[7] Exit" -ForegroundColor White
     Write-Host
     
-    $choice = Read-Host "Select an option (1-7)"
+    $choice = Read-Host "Select an option (1-7)" -ForegroundColor White
     
     if ($choice -in @('3','4','5')) {
         $createRestorePoint = Read-Host "Create system restore point before making changes? (y/N)"
