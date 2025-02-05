@@ -61,6 +61,35 @@ function Test-PrivacyFeatureAvailability {
     }
 }
 
+# System Restore Point
+function New-SystemRestorePoint {
+    Write-Log "Creating System Restore Point..." -Level 'Info'
+    
+    try {
+        # Load the System.Management.Automation.dll assembly
+        $null = [System.Reflection.Assembly]::LoadWithPartialName("System.Management.Automation")
+        
+        # Enable System Restore if not already enabled
+        Enable-ComputerRestore -Drive "C:\" -ErrorAction SilentlyContinue
+        
+        # Create the restore point
+        $restorePoint = @{
+            Description = "Windows 11 Privacy Settings Backup"
+            RestorePointType = "MODIFY_SETTINGS"
+        }
+        
+        $null = Checkpoint-Computer @restorePoint -ErrorAction Stop
+        
+        Write-Log "System Restore Point created successfully" -Level 'Info'
+        return $true
+    }
+    catch {
+        Write-Log "Error creating System Restore Point: $($_.Exception.Message)" -Level 'Error'
+        Write-Log "Please ensure System Restore is enabled in System Properties" -Level 'Warning'
+        return $false
+    }
+}
+
 # Registry value setter with backup
 function Set-RegistryValueWithBackup {
     param (
@@ -118,7 +147,6 @@ function Set-WindowsPrivacy {
         -Name 'MaxTelemetryAllowed' -Value 0 `
         -Description "Set Maximum Telemetry Level to Security"
 
-    # Basic Telemetry Settings
     Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection' `
         -Name 'DisableEnterpriseAuthProxy' -Value 1 `
         -Description "Disable Enterprise Authentication for Telemetry"
@@ -257,13 +285,58 @@ function Set-WindowsPrivacy {
     Set-RegistryValueWithBackup -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' `
         -Name 'SubscribedContent-338393Enabled' -Value 0 `
         -Description "Disable Suggested Content in Settings"
+       
+    # Disable Search Highlights
+    Set-RegistryValueWithBackup -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\SearchSettings' `
+        -Name 'IsDynamicSearchBoxEnabled' -Value 0 `
+        -Description "Disable Search Highlights"
 
-    # Disable Suggested Content in Windows Spotlight
+    # Disable MS Teams Icon
+    Set-RegistryValueWithBackup -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' `
+        -Name 'TaskbarMn' -Value 0 `
+        -Description "Disable Chat Icon"
+
+     # Disable Bing Search in Start Menu
+    Set-RegistryValueWithBackup -Path 'HKCU:\Software\Policies\Microsoft\Windows\Explorer' `
+        -Name 'DisableSearchBoxSuggestions' -Value 1 `
+        -Description "Disable Bing Search in Start Menu"
+
+    # Disable Windows Widget Service
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Dsh' `
+        -Name 'AllowNewsAndInterests' -Value 0 `
+        -Description "Disable Windows Widget Service"
+
+    # Disable Microsoft Account Sign-in Assistant
+    Set-RegistryValueWithBackup -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\wlidsvc' `
+        -Name 'Start' -Value 4 `
+        -Description "Disable Microsoft Account Sign-in Service"
+
+    # Disable Windows Error Reporting
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting' `
+        -Name 'Disabled' -Value 1 `
+        -Description "Disable Windows Error Reporting"
+ 
+    # Disable Device Census
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Metadata' `
+        -Name 'PreventDeviceMetadataFromNetwork' -Value 1 `
+        -Description "Disable Device Metadata Collection"
+
+    # Disable Microsoft Store Auto Install
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore' `
+        -Name 'AutoDownload' -Value 2 `
+        -Description "Disable Automatic Store Updates"
+
+    # Disable Windows Welcome Experience
+    Set-RegistryValueWithBackup -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' `
+        -Name 'SubscribedContent-310093Enabled' -Value 0 `
+        -Description "Disable Welcome Experience"
+
+    # Disable Windows Spotlight
     Set-RegistryValueWithBackup -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' `
         -Name 'SubscribedContent-338387Enabled' -Value 0 `
-        -Description "Disable Windows Spotlight Content"
+        -Description "Disable Windows Spotlight"
+     
 }
-
 # Windows Update Delivery Optimization Configuration
 function Set-DeliveryOptimization {
     Write-Log "Configuring Windows Update Delivery Optimization..." -Level 'Info'
@@ -378,7 +451,7 @@ function Show-Menu {
         2 = "Enable Hosts File Blocking"
         3 = "Optimize Windows Privacy Settings"
         4 = "Run All Optimizations"
-        5 = "Revert Changes"
+        5 = "Revert Changes (current session only - will be lost after closing)"
         6 = "Exit"
     }
     
@@ -388,6 +461,19 @@ function Show-Menu {
     }
     
     $choice = Read-Host "`nSelect an option (1-6)"
+    
+    if ($choice -in @('3','4')) {
+        $createRestorePoint = Read-Host "Create system restore point before making changes? (y/N)"
+        if ($createRestorePoint -eq 'y') {
+            if (-not (New-SystemRestorePoint)) {
+                $proceed = Read-Host "Failed to create restore point. Continue anyway? (y/N)"
+                if ($proceed -ne 'y') {
+                    return $null
+                }
+            }
+        }
+    }
+    
     return $choice
 }
 
@@ -477,12 +563,22 @@ $domains = @(
 
 do {
     $choice = Show-Menu
+  
+
+    if ($null -eq $choice) {
+        continue
+    }
+
     switch ($choice) {
-        1 { Set-DeliveryOptimization }
-        2 { Update-HostsFile -BlockDomains $domains }
+        1 { 
+            Set-DeliveryOptimization 
+        }
+        2 { 
+            Update-HostsFile -BlockDomains $domains 
+        }
         3 { 
             $featureAvailability = Test-PrivacyFeatureAvailability -Compatibility $compatibility
-            Set-WindowsPrivacy 
+            Set-WindowsPrivacy
         }
         4 {
             Write-Log "Running all optimizations..." -Level 'Info'
