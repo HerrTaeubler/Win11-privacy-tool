@@ -394,6 +394,59 @@ function Set-WindowsPrivacy {
     Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' `
         -Name 'SubscribedContent-353696Enabled' -Value 0 `
         Description "Disable additional suggestions"
+
+        # App Permissions Privacy Settings
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\microphone' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Microphone Access by Default"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\webcam' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Camera Access by Default"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\userAccountInformation' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Account Info Access"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\contacts' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Contacts Access"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\appointments' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Calendar Access"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\phoneCall' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Phone Call Access"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\radios' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Radios Access"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\bluetoothSync' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Bluetooth Access"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\broadFileSystemAccess' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Broad File System Access"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\documentsLibrary' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Documents Library Access"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\picturesLibrary' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Pictures Library Access"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\videosLibrary' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Videos Library Access"
+
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\musicLibrary' `
+        -Name 'Value' -Value 'Deny' `
+        -Description "Disable Music Library Access"
      
 }
 # Windows Update Delivery Optimization Configuration
