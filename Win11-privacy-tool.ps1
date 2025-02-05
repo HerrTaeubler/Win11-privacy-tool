@@ -393,7 +393,12 @@ function Set-WindowsPrivacy {
         -Name 'SubscribedContent-353696Enabled' -Value 0 `
         Description "Disable additional suggestions"
 
-        # App Permissions Privacy Settings
+    # Disable App Notifications
+    Set-RegistryValueWithBackup -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\SystemSettings\AccountNotifications' `
+        -Name 'EnableAccountNotifications' -Value 0 `
+        -Description "Disable Settings App Notifications"
+
+    # App Permissions Privacy Settings
     Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\microphone' `
         -Name 'Value' -Value 'Deny' `
         -Description "Disable Microphone Access by Default"
