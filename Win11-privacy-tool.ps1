@@ -269,9 +269,7 @@ function Set-WindowsPrivacy {
     Set-RegistryValueWithBackup -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NlaSvc\Parameters\Internet' `
         -Name 'EnableActiveProbing' -Value 0 `
         -Description "Disable Network Location Awareness"
-
-    Write-Log "Windows privacy settings configuration completed" -Level 'Info'
-
+  
     # Disable Windows Tips and Suggestions
     Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent' `
         -Name 'DisableSoftLanding' -Value 1 `
@@ -447,6 +445,8 @@ function Set-WindowsPrivacy {
     Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\musicLibrary' `
         -Name 'Value' -Value 'Deny' `
         -Description "Disable Music Library Access"
+
+    Write-Log "Windows privacy settings configuration completed" -Level 'Info'        
      
 }
 # Windows Update Delivery Optimization Configuration
