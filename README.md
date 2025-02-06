@@ -1,110 +1,95 @@
-# Windows 11 Privacy Optimizer   
+# Windows 11 Privacy Optimizer v 1.0   
 
 ![License: MIT](https://img.shields.io/github/license/HerrTaeubler/Win11-privacy-tool)
 
-A PowerShell script to optimize privacy settings in Windows 11.
-
-This tool aims to restrict Windows' data collection and telemetry as much as possible while maintaining system stability and functionality. It provides a balanced approach between privacy and usability, ensuring Windows remains fully operational while minimizing unnecessary data transmission.
+A comprehensive PowerShell script to enhance and manage privacy settings in Windows 11, providing a balanced approach between privacy and functionality.
 
 ## Features
-- Restriction of Windows Update Delivery Optimization
-- Block telemetry and tracking domains using hagezi's blocklist
-- Comprehensive Windows privacy settings optimization
-- Enhanced Windows Search privacy controls
-- Dedicated App Permissions Management
-- Backup and restore functionality for all changes
-- Detailed logging system
 
-## Installation
-Open PowerShell as administrator and run the following command:
+### Core Functions
+- 🛡️ Windows Privacy Settings Optimization
+- 🌐 Telemetry and Tracking Domain Blocking (using hagezi's blocklist)
+- 📦 Windows Update Delivery Optimization
+- 📱 App Permissions Management
+- 🔄 Cleanup of Backups and Logs
+
+### Key Benefits
+- 🔒 Enhanced Privacy Controls
+- 💻 System Stability Focus
+- 📊 Detailed Logging
+- ⚡ Easy to Use Interface
+- 🔄 Reversible Changes
+
+## Quick Start
+
+### Installation
+Open PowerShell as administrator and run:
 
 ```irm https://raw.githubusercontent.com/HerrTaeubler/Win11-privacy-tool/main/Win11-privacy-tool.ps1 | iex```
 
-## Functions
-- Automatic detection of Windows version and build
-- Backup of all changes (current session)
-- Optional System Restore Point creation before applying changes (user prompt)
-- User-friendly menu interface
-- Detailed logging function with different severity levels
-
-## Requirements
+### Requirements
+- Windows 11
 - PowerShell 5.1 or higher
 - Administrator rights
 
-## Features in Detail
+## Detailed Features
 
-### Windows Update Delivery Optimization
-- Restricts peer-to-peer updates to local network only
-- Limits upload bandwidth
+### Privacy Settings Management
+- Telemetry and data collection controls
+- Windows Search privacy enhancement
+- Cloud sync restrictions
+- Windows Hello privacy settings
+- Activity history management
+- Feedback and diagnostics controls
+- Content delivery management
 
-### Host File Blocking
-The tool automatically downloads and uses hagezi's Windows/Office blocklist to protect your privacy. This feature:
+### App Permissions Control
+- Camera and microphone access
+- Location services
+- Contact and calendar access
+- File system permissions
+- Background app management
+- Notification controls
 
-- Downloads the latest version of hagezi's curated blocklist
-- Automatically blocks known tracking and telemetry domains
-- Creates backups of your existing hosts file
-- Updates DNS cache after modifications
+### Network Privacy
+- Update delivery optimization
+- DNS blocking via hosts file
+- Network location awareness
+- Cloud content restrictions
 
-
-The blocklist is sourced from: https://github.com/hagezi/dns-blocklists
-
-### Privacy Settings
-- Disables telemetry collection
-- Restricts app diagnostics
-- Disables advertising ID
-- Controls Windows Search privacy
-- Manages app permissions
-- Controls cloud sync settings
-- Manages Windows Hello settings
-- Controls Timeline and activity history
-- Disables unnecessary services
-- Manages Windows feedback settings
-- Controls clipboard history
-- Manages language settings
-- Controls content delivery
-
-
-### App Permissions Management
-- Microphone access
-- Camera access
-- Account information access
-- Contacts access
-- Calendar access
-- Phone call access
-- Radio/Bluetooth access
-- File system access
-- Documents/Pictures/Videos/Music library access
-- Email and Tasks access
-- Chat/Messaging access
-- Downloads folder access
-- Screen capture and Screenshot capabilities
-
-### Additional Features
-- Automatic system compatibility check
-- Detailed logging of all changes
-- Easy restore functionality
-- Build-specific optimizations
-
-## Security
-The script automatically creates backups of all changes and allows for easy restoration through:
-- System Restore Point (optional)
-- Registry backups (current session)
-- Hosts file backup
+### Security & Backup
+- Automatic backup creation
+- System Restore Point option
+- Registry change tracking
+- Easy restoration process
 
 ## Compatibility
-This script is specifically designed for Windows 11 but may work on Windows 10 with limited functionality. 
 
-## License
-MIT License
-
-## Author
-Herr Täubler
+Optimized for Windows 11, with special handling for different builds:
+- Full support for Windows 11 24H2
+- Compatible with Windows 11 23H2
+- Basic support for Windows 11 22H2
 
 ## Credits
-Using hagezi's Windows/Office blocklist (https://github.com/hagezi)
+
+- Using [hagezi's Windows/Office blocklist](https://github.com/hagezi)
+- Community contributions and feedback
+
+## License
+
+MIT License - See LICENSE file for details
+
+## Author
+
+Herr Täubler
 
 ## Disclaimer
-Use this script at your own risk. While efforts have been made to ensure safe operation, I am not responsible for any potential issues that may arise from using this script.
 
-## Contributing
-Contributions are welcome! Please feel free to submit a Pull Request.
+While this tool is designed to be safe and reversible, use it at your own risk. Always ensure you have proper backups before making system changes.
+
+## Support
+
+For issues, questions, or suggestions:
+- Open an issue on GitHub
+- Submit a pull request
+- Contact via GitHub
