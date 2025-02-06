@@ -506,9 +506,7 @@ function Set-DeliveryOptimization {
 # Hosts File Management
 function Update-HostsFile {
     param (
-        [string]$HageziUrl = "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/hosts/native.winoffice.txt",
-        [string[]]$AdditionalDomains = @(),
-        [switch]$IncludeWildcards = $true
+        [string]$HageziUrl = "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/hosts/native.winoffice.txt"
     )
     
     $hostsPath = "$env:SystemRoot\System32\drivers\etc\hosts"
@@ -534,20 +532,16 @@ function Update-HostsFile {
         $hageziContent = $webClient.DownloadString($HageziUrl)
         
         # Parse domains from Hagezi's list
-        $hageziDomains = $hageziContent -split "`n" | Where-Object {
+        $domains = $hageziContent -split "`n" | Where-Object {
             $_ -match '^0\.0\.0\.0\s+(.+)$'
         } | ForEach-Object {
             ($_ -split '\s+')[1]
         }
         
-        Write-Log "Downloaded ${hageziDomains.Count} domains from Hagezi's list" -Level 'Info'
+        Write-Log "Downloaded ${domains.Count} domains from Hagezi's list" -Level 'Info'
         
-        # Combine with additional domains
-        $allDomains = @($hageziDomains) + $AdditionalDomains
-        $allDomains = $allDomains | Select-Object -Unique
-        
-        # Prepare new entries
-        $newEntries = @(
+        # Prepare new hosts file content
+        $newContent = @(
             "# Windows 11 Privacy Optimization - $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
             "# Using Hagezi's Windows/Office Tracker Blocklist"
             "# Source: $HageziUrl"
@@ -560,21 +554,11 @@ function Update-HostsFile {
             "# Blocked domains for privacy"
         )
 
-        # Process domains
-        foreach ($domain in $allDomains) {
-            if ($domain -match '^\*') {
-                if ($IncludeWildcards) {
-                    $baseDomain = $domain.TrimStart('*.')
-                    $newEntries += "0.0.0.0 $baseDomain"
-                    $newEntries += "0.0.0.0 *.$baseDomain"
-                }
-            } else {
-                $newEntries += "0.0.0.0 $domain"
-            }
-        }
+        # Add domains to hosts file
+        $newContent += $domains | ForEach-Object { "0.0.0.0 $_" }
         
-        # Write content directly to temp file
-        $newContent = $newEntries -join "`n"
+        # Write content to temp file
+        $newContent = $newContent -join "`n"
         [System.IO.File]::WriteAllText($tempHostsPath, $newContent, [System.Text.Encoding]::ASCII)
         
         # Copy temp file to hosts with elevated privileges
@@ -588,7 +572,7 @@ function Update-HostsFile {
         ipconfig /flushdns | Out-Null
         Write-Log "DNS cache flushed" -Level 'Info'
         
-        Write-Log "Hosts file successfully updated with $($allDomains.Count) domains" -Level 'Info'
+        Write-Log "Hosts file successfully updated with $($domains.Count) domains" -Level 'Info'
         return $true
     }
     catch {
