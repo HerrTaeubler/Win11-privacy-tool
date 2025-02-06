@@ -643,7 +643,7 @@ function Show-Menu {
     Write-Host "https://github.com/hagezi" -ForegroundColor DarkCyan
     Write-Host
     Write-Host "Created by Herr Täubler" -ForegroundColor DarkCyan
-    Write-Host "https://github.com/HerrTaeubler/Win11-privacy-tool" -ForegroundColor DarkGrey
+    Write-Host "https://github.com/HerrTaeubler/Win11-privacy-tool" -ForegroundColor DarkCyan
     Write-Host "===========================================" -ForegroundColor Cyan
     Write-Host "[1] Restrict Windows Update Delivery Optimization" -ForegroundColor White
     Write-Host "[2] Enable Hosts File Blocking" -ForegroundColor White
