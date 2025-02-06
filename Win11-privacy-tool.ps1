@@ -1,6 +1,9 @@
 # Windows 11 Privacy Optimization
 # Run as Administrator
-
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Write-Log "This script requires administrator privileges. Please run as administrator." -Level 'Error'
+    exit 1
+}
 # Initialization and Helper Functions
 function Write-Log {
     param(
@@ -20,12 +23,21 @@ function Write-Log {
     $logMessage = "[$timestamp] [$Level] $Message"
     Add-Content -Path $logFile -Value $logMessage
     
-    # Console output with colors
-    switch ($Level) {
-        'Warning' { Write-Host $logMessage -ForegroundColor Yellow }
-        'Error' { Write-Host $logMessage -ForegroundColor Red }
-        default { Write-Host $logMessage }
+    # Console output with colors and symbols
+    $symbol = switch ($Level) {
+        'Info'    { ">" }
+        'Warning' { "!" }
+        'Error'   { "x" }
     }
+    
+    $color = switch ($Level) {
+        'Info'    { 'Cyan' }
+        'Warning' { 'Yellow' }
+        'Error'   { 'Red' }
+    }
+    
+    Write-Host $symbol -ForegroundColor $color -NoNewline
+    Write-Host " $Message"
 }
 
 # System Analysis Function
@@ -60,6 +72,8 @@ function Test-PrivacyFeatureAvailability {
         return $false
     }
 }
+
+$script:compatibility = Test-SystemCompatibility
 
 # System Restore Point
 function New-SystemRestorePoint {
@@ -100,6 +114,11 @@ function Set-RegistryValueWithBackup {
     )
     
     try {
+        # Validate registry path format
+        if (-not ($Path -match '^HKLM:\\|^HKCU:\\')) {
+            throw "Invalid registry path format: $Path"
+        }
+
         # Backup old value
         if (Test-Path $Path) {
             $oldValue = Get-ItemProperty -Path $Path -Name $Name -ErrorAction SilentlyContinue
@@ -116,11 +135,11 @@ function Set-RegistryValueWithBackup {
         
         # Create path if it doesn't exist
         if (-not (Test-Path $Path)) {
-            New-Item -Path $Path -Force | Out-Null
+            New-Item -Path $Path -Force -ErrorAction Stop | Out-Null
         }
         
         # Set value
-        Set-ItemProperty -Path $Path -Name $Name -Value $Value
+        Set-ItemProperty -Path $Path -Name $Name -Value $Value -ErrorAction Stop
         Write-Log "Registry value set: $Path\$Name = $Value $(if($Description){" ($Description)"})" -Level 'Info'
         return $true
     }
@@ -289,11 +308,6 @@ function Set-WindowsPrivacy {
         -Name 'EnhancedAntiSpoofing' -Value 0 `
         -Description "Disable Windows Hello Face"
 
-    # Disable Timeline
-    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System' `
-        -Name 'EnableActivityFeed' -Value 0 `
-        -Description "Disable Timeline Feature"
-
     # Disable Shared Experiences
     Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System' `
         -Name 'EnableCdp' -Value 0 `
@@ -314,7 +328,7 @@ function Set-WindowsPrivacy {
         -Name 'TaskbarMn' -Value 0 `
         -Description "Disable Chat Icon"
 
-     # Disable Bing Search in Start Menu
+    # Disable Bing Search in Start Menu
     Set-RegistryValueWithBackup -Path 'HKCU:\Software\Policies\Microsoft\Windows\Explorer' `
         -Name 'DisableSearchBoxSuggestions' -Value 1 `
         -Description "Disable Bing Search in Start Menu"
@@ -381,15 +395,15 @@ function Set-WindowsPrivacy {
         -Description "Disable language configuration access"
        
     # Disable suggested content in Settings app
-    Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' `
+    Set-RegistryValueWithBackup -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' `
         -Name 'SubscribedContent-338393Enabled' -Value 0 `
         -Description "Disable suggested content in Settings app"
 
-    Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' `
+    Set-RegistryValueWithBackup -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' `
         -Name 'SubscribedContent-353694Enabled' -Value 0 `
         -Description "Disable suggestions in Settings"
 
-    Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' `
+    Set-RegistryValueWithBackup -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' `
         -Name 'SubscribedContent-353696Enabled' -Value 0 `
         -Description "Disable additional suggestions"
 
@@ -403,7 +417,7 @@ function Set-WindowsPrivacy {
 }   
 
 function Set-AppPermissions {
-    Write-Log "Configuring Windows privacy settings..." -Level 'Info'
+    Write-Log "Configuring Windows App Permissions..." -Level 'Info'
 
     # App Permissions Privacy Settings
     Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\microphone' `
@@ -486,9 +500,10 @@ function Set-AppPermissions {
         -Name 'Value' -Value 'Deny' `
         -Description "Disable Screenshot Capability"   
 
-    Write-Log "Windows privacy settings configuration completed" -Level 'Info'        
+    Write-Log "Windows App Permissions configuration completed" -Level 'Info'        
      
 }
+
 # Windows Update Delivery Optimization Configuration
 function Set-DeliveryOptimization {
     Write-Log "Configuring Windows Update Delivery Optimization..." -Level 'Info'
@@ -500,6 +515,8 @@ function Set-DeliveryOptimization {
     Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config' `
         -Name 'DOMaxUploadBandwidth' -Value 1 `
         -Description "Restrict Upload Bandwidth"
+
+    Write-Log "Windows Update Delivery Optimization configuration completed" -Level 'Info'   
        
 }
 
@@ -510,23 +527,11 @@ function Update-HostsFile {
     )
     
     $hostsPath = "$env:SystemRoot\System32\drivers\etc\hosts"
-    $backupPath = "$env:SystemRoot\System32\drivers\etc\hosts.backup"
+    $backupPath = "$env:SystemRoot\System32\drivers\etc\hosts.backup.$(Get-Date -Format 'yyyyMMdd_HHmmss')"
     $tempHostsPath = "$env:TEMP\hosts.tmp"
     
     try {
-        # Create hosts file if it doesn't exist
-        if (-not (Test-Path $hostsPath)) {
-            Write-Log "Creating new hosts file..." -Level 'Info'
-            New-Item -ItemType File -Path $hostsPath -Force | Out-Null
-        }
-
-        # Create backup only if original file exists and has content
-        if ((Test-Path $hostsPath) -and (Get-Item $hostsPath).Length -gt 0) {
-            Copy-Item -Path $hostsPath -Destination $backupPath -Force
-            Write-Log "Hosts file backup created: $backupPath" -Level 'Info'
-        }
-        
-        # Download Hagezi's blocklist
+        # Download Hagezi's blocklist first to validate we can get the content
         Write-Log "Downloading Hagezi's blocklist..." -Level 'Info'
         $webClient = New-Object System.Net.WebClient
         $hageziContent = $webClient.DownloadString($HageziUrl)
@@ -557,23 +562,39 @@ function Update-HostsFile {
         # Add domains to hosts file
         $newContent += $domains | ForEach-Object { "0.0.0.0 $_" }
         
-        # Write content to temp file
-        $newContent = $newContent -join "`n"
-        [System.IO.File]::WriteAllText($tempHostsPath, $newContent, [System.Text.Encoding]::ASCII)
+        # Create backup if original exists
+        if (Test-Path $hostsPath) {
+            Write-Log "Creating backup of hosts file..." -Level 'Info'
+            $backupScript = @"
+                Copy-Item -Path '$hostsPath' -Destination '$backupPath' -Force
+                if (`$?) { Write-Host 'Backup created successfully' }
+"@
+            Start-Process powershell -Verb RunAs -ArgumentList "-Command", $backupScript -Wait
+        }
+
+        # Write new content to hosts file using PowerShell with elevated privileges
+        Write-Log "Updating hosts file..." -Level 'Info'
+        $newContent = $newContent -join "`r`n"
+        $updateScript = @"
+            Set-Content -Path '$hostsPath' -Value @'
+$newContent
+'@ -Force -Encoding ASCII
+            if (`$?) { 
+                Write-Host 'Hosts file updated successfully'
+                ipconfig /flushdns | Out-Null
+            }
+"@
         
-        # Copy temp file to hosts with elevated privileges
-        $argument = "Copy-Item -Path '$tempHostsPath' -Destination '$hostsPath' -Force"
-        Start-Process powershell -Verb RunAs -ArgumentList "-Command", $argument -Wait
+        # Execute the update with elevated privileges
+        $result = Start-Process powershell -Verb RunAs -ArgumentList "-Command", $updateScript -Wait -PassThru
         
-        # Cleanup temp file
-        Remove-Item -Path $tempHostsPath -Force -ErrorAction SilentlyContinue
-        
-        # Flush DNS cache
-        ipconfig /flushdns | Out-Null
-        Write-Log "DNS cache flushed" -Level 'Info'
-        
-        Write-Log "Hosts file successfully updated with $($domains.Count) domains" -Level 'Info'
-        return $true
+        if ($result.ExitCode -eq 0) {
+            Write-Log "Hosts file successfully updated with $($domains.Count) domains" -Level 'Info'
+            Write-Log "DNS cache flushed" -Level 'Info'
+            return $true
+        } else {
+            throw "Failed to update hosts file"
+        }
     }
     catch {
         Write-Log "Error updating hosts file: $($_.Exception.Message)" -Level 'Error'
@@ -581,178 +602,179 @@ function Update-HostsFile {
         return $false
     }
 }
-
-# Interactive Menu
-function Write-Log {
-    param(
-        [string]$Message,
-        [ValidateSet('Info', 'Warning', 'Error')]
-        [string]$Level = 'Info'
-    )
+function Remove-OldBackups {
     
-    $logFolder = "C:\Windows\Logs\PrivacyOptimizer"
-    $logFile = Join-Path $logFolder "privacy_$(Get-Date -Format 'yyyyMMdd').log"
-    $timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
+    Write-Log "Starting cleanup of old backups and logs..." -Level 'Info'
     
-    if (-not (Test-Path $logFolder)) {
-        New-Item -ItemType Directory -Path $logFolder -Force | Out-Null
-    }
-    
-    $logMessage = "[$timestamp] [$Level] $Message"
-    Add-Content -Path $logFile -Value $logMessage
-    
-    # Console output with colors and symbols
-    $symbol = switch ($Level) {
-        'Info'    { ">" }
-        'Warning' { "!" }
-        'Error'   { "x" }
-    }
-    
-    $color = switch ($Level) {
-        'Info'    { 'Cyan' }
-        'Warning' { 'Yellow' }
-        'Error'   { 'Red' }
-    }
-    
-    Write-Host $symbol -ForegroundColor $color -NoNewline
-    Write-Host " $Message"
-}
-
-function Show-Menu {
-    Clear-Host
-    Write-Host "===========================================" -ForegroundColor Cyan
-    Write-Host "         Windows 11 Privacy Tool          " -ForegroundColor Cyan
-    Write-Host "===========================================" -ForegroundColor Cyan
-    Write-Host "Using hagezi's Windows/Office blocklist" -ForegroundColor DarkCyan
-    Write-Host "https://github.com/hagezi" -ForegroundColor DarkCyan
-    Write-Host
-    Write-Host "Created by Herr Täubler" -ForegroundColor DarkCyan
-    Write-Host "https://github.com/HerrTaeubler/Win11-privacy-tool" -ForegroundColor DarkCyan
-    Write-Host "===========================================" -ForegroundColor Cyan
-    Write-Host "[1] Restrict Windows Update Delivery Optimization" -ForegroundColor White
-    Write-Host "[2] Enable Hosts File Blocking" -ForegroundColor White
-    Write-Host "[3] Optimize Windows Privacy Settings" -ForegroundColor White
-    Write-Host "[4] Configure App Permissions" -ForegroundColor White
-    Write-Host "[5] Run All Optimizations" -ForegroundColor White
-    Write-Host "[6] Revert Changes" -ForegroundColor White
-    Write-Host "    └─ Only reverts changes made in this session" -ForegroundColor Yellow
-    Write-Host "[7] Exit" -ForegroundColor White
-    Write-Host
-    Write-Host 
-    
-    Write-Host "Select an option (1-7): " -ForegroundColor White -NoNewline
-    $choice = Read-Host
-   
-    if ($choice -in @('3','4','5')) {
-        $createRestorePoint = Read-Host "Create system restore point before making changes? (y/N)"
-        if ($createRestorePoint -eq 'y') {
-            if (-not (New-SystemRestorePoint)) {
-                $proceed = Read-Host "Failed to create restore point. Continue anyway? (y/N)"
-                if ($proceed -ne 'y') {
-                    return $null
+    try {
+        # Cleanup hosts file backups - keep only 5 most recent
+        $hostsBackupPath = "$env:SystemRoot\System32\drivers\etc"
+        $hostsBackups = Get-ChildItem -Path $hostsBackupPath -Filter "hosts.backup*" | 
+                       Sort-Object LastWriteTime -Descending
+        
+        if ($hostsBackups.Count -gt 2) {
+            $hostsBackups | Select-Object -Skip 2 | ForEach-Object {
+                try {
+                    Remove-Item $_.FullName -Force
+                    Write-Log "Removed old hosts backup: $($_.Name)" -Level 'Info'
+                }
+                catch {
+                    Write-Log "Failed to remove hosts backup $($_.Name): $($_.Exception.Message)" -Level 'Error'
                 }
             }
         }
+        
+        # Cleanup old log files (older than 30 days)
+        $logFolder = "C:\Windows\Logs\PrivacyOptimizer"
+        if (Test-Path $logFolder) {
+            $oldLogs = Get-ChildItem -Path $logFolder -Filter "privacy_*.log" | 
+                      Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-7) }
+            
+            foreach ($log in $oldLogs) {
+                try {
+                    Remove-Item $log.FullName -Force
+                    Write-Log "Removed old log file: $($log.Name)" -Level 'Info'
+                }
+                catch {
+                    Write-Log "Failed to remove log file $($log.Name): $($_.Exception.Message)" -Level 'Error'
+                }
+            }
+        }
+        
+        Write-Log "Cleanup completed successfully" -Level 'Info'
+        return $true
     }
+    catch {
+        Write-Log "Error during cleanup: $($_.Exception.Message)" -Level 'Error'
+        return $false
+    }
+}
+
+# Interactive Menu
+function Show-Menu {
+    Clear-Host
+    $border = '==========================================='
+    $title = '         Windows 11 Privacy Tool          
+                        v 1.0 '
+    Write-Host $border -ForegroundColor Cyan
+    Write-Host $title -ForegroundColor Cyan
+    Write-Host $border -ForegroundColor Cyan
+    Write-Host
+    Write-Host 'Using hagezi Windows/Office blocklist' -ForegroundColor DarkCyan
+    Write-Host 'https://github.com/hagezi' -ForegroundColor DarkCyan
+    Write-Host
+    Write-Host 'Created by Herr Taeubler' -ForegroundColor DarkCyan
+    Write-Host 'https://github.com/HerrTaeubler' -ForegroundColor DarkCyan
+    Write-Host $border -ForegroundColor Cyan
+    Write-Host
+    Write-Host '[1] Restrict Windows Update Delivery Optimization' -ForegroundColor White
+    Write-Host '[2] Enable Hosts File Blocking' -ForegroundColor White
+    Write-Host '[3] Optimize Windows Privacy Settings' -ForegroundColor White
+    Write-Host '[4] Configure App Permissions' -ForegroundColor White
+    Write-Host '[5] Run All Optimizations' -ForegroundColor White
+    Write-Host '[6] Revert Changes' -ForegroundColor White
+    Write-Host '    - Only reverts changes made in this session' -ForegroundColor Yellow
+    Write-Host '[7] Cleanup Old Backups and Logs' -ForegroundColor White
+    Write-Host '[8] Exit' -ForegroundColor White
+    Write-Host
     
-    return $choice
-}
+    
+        do {
+            Write-Host "Select an option (1-8): " -ForegroundColor White -NoNewline
+            $choice = Read-Host
+            if ($choice -match '^[1-8]$') {
+                break
+            }
+            Write-Host "Invalid input. Please enter a number between 1 and 8." -ForegroundColor Red
+        } while ($true)
+        
+        if ($choice -in @('3','4','5')) {
+            do {
+                $createRestorePoint = Read-Host 'Create system restore point before making changes? (y/N)'
+                if ($createRestorePoint -match '^[yYnN]?$') {
+                    break
+                }
+                Write-Host "Invalid input. Please enter 'y' or 'n' (or press Enter for No)." -ForegroundColor Red
+            } while ($true)
+            
+            if ($createRestorePoint -eq 'y') {
+                if (-not (New-SystemRestorePoint)) {
+                    do {
+                        $proceed = Read-Host 'Failed to create restore point. Continue anyway? (y/N)'
+                        if ($proceed -match '^[yYnN]?$') {
+                            break
+                        }
+                        Write-Host "Invalid input. Please enter 'y' or 'n' (or press Enter for No)." -ForegroundColor Red
+                    } while ($true)
+                    
+                    if ($proceed -ne 'y') {
+                        return $null
+                    }
+                }
+            }
+        }
+        
+        return $choice
+    }
 
-# Main Program
+# Main Program Loop
 $script:registryBackups = @()
-$compatibility = Test-SystemCompatibility
-
-if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Write-Log "This script must be run as Administrator!" -Level 'Error'
-    exit
-}
-
-if (-not $compatibility.IsWindows11) {
-    Write-Log "WARNING: This script is optimized for Windows 11. Some features might not work correctly on your system." -Level 'Warning'
-}
 
 do {
     $choice = Show-Menu
-  
-    if ($null -eq $choice) {
-        continue
+    
+    if ($null -eq $choice) { 
+        continue 
     }
-
+    
     switch ($choice) {
-        1 { 
-            Set-DeliveryOptimization 
-        }
-        2 { 
-            Write-Log "Starting hosts file modification..." -Level 'Info'
-            $currentHostsContent = Get-Content "$env:SystemRoot\System32\drivers\etc\hosts" -ErrorAction SilentlyContinue
-            
-            if ($currentHostsContent) {
-                Write-Log "Current hosts file contains $($currentHostsContent.Count) lines" -Level 'Info'
-                $proceed = Read-Host "Current hosts file will be modified. Continue? (y/N)"
-                
-                if ($proceed -eq 'y') {
-                    if (Update-HostsFile) {
-                        Write-Log "Hosts file successfully updated" -Level 'Info'
-                    } else {
-                        Write-Log "Failed to update hosts file" -Level 'Error'
-                    }
-                } else {
-                    Write-Log "Hosts file modification cancelled by user" -Level 'Info'
-                }
-            } else {
-                Write-Log "No existing hosts file found or access denied" -Level 'Warning'
-                $proceed = Read-Host "Create new hosts file? (y/N)"
-                
-                if ($proceed -eq 'y') {
-                    if (Update-HostsFile) {
-                        Write-Log "New hosts file created successfully" -Level 'Info'
-                    } else {
-                        Write-Log "Failed to create hosts file" -Level 'Error'
-                    }
-                }
-            }
-        
-        }
+        1 { Set-DeliveryOptimization }
+        2 { Update-HostsFile }
         3 { 
-            $featureAvailability = Test-PrivacyFeatureAvailability -Compatibility $compatibility
+            $featureAvailability = Test-PrivacyFeatureAvailability -Compatibility $script:compatibility
             Set-WindowsPrivacy
         }
-        4 { 
-            Set-AppPermissions
-        }
+        4 { Set-AppPermissions }
+
         5 {
-            Write-Log "Running all optimizations..." -Level 'Info'
-            $featureAvailability = Test-PrivacyFeatureAvailability -Compatibility $compatibility
+            Write-Log 'Running all optimizations...' -Level Info
+            $featureAvailability = Test-PrivacyFeatureAvailability -Compatibility $script:compatibility
             Set-DeliveryOptimization
             Set-WindowsPrivacy
             Set-AppPermissions
             Update-HostsFile 
         }
         6 {
-            Write-Log "Restoring backup values..." -Level 'Info'
+            Write-Log 'Restoring backup values...' -Level Info
             foreach ($backup in $script:registryBackups) {
                 Set-ItemProperty -Path $backup.Path -Name $backup.Name -Value $backup.Value
                 Write-Log "Restored: $($backup.Path)\$($backup.Name) = $($backup.Value)" -Level 'Info'
             }
             if (Test-Path "$env:SystemRoot\System32\drivers\etc\hosts.backup") {
                 Copy-Item "$env:SystemRoot\System32\drivers\etc\hosts.backup" "$env:SystemRoot\System32\drivers\etc\hosts" -Force
-                Write-Log "Hosts file restored from backup" -Level 'Info'
+                Write-Log 'Hosts file restored from backup' -Level 'Info'
             }
         }
-        7 {
-            Write-Log "Program terminated" -Level 'Info'
+        7 { 
+            Write-Log 'Starting cleanup operation...' -Level 'Info'
+            if (Remove-OldBackups) {
+                Write-Log 'Cleanup completed successfully' -Level 'Info'
+            } else {
+                Write-Log 'Cleanup operation encountered some errors' -Level 'Warning'
+            }
+        }
+        8 {
+            Write-Log 'Program terminated' -Level 'Info'
             exit
         }
-        default {
-            Write-Log "Invalid selection" -Level 'Warning'
-        }
+        default { Write-Log 'Invalid selection' -Level 'Warning' }
     }
     
-    if ($choice -ne 7) {
+    if ($choice -ne 8) {
         Write-Host
-        Write-Host "===========================================" -ForegroundColor Yellow
-        Write-Host "    Press any key to return to menu...    " -ForegroundColor Green
-        Write-Host "===========================================" -ForegroundColor Yellow
-        $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        Write-Host '===========================================' -ForegroundColor Yellow
+        Write-Host 'Press any key to return to menu...' -ForegroundColor Green
+        Write-Host '===========================================' -ForegroundColor Yellow
+        $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
     }
-} while ($choice -ne 7)
+} while ($choice -ne 8)
