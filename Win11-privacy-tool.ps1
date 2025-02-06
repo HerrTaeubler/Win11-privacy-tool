@@ -391,7 +391,7 @@ function Set-WindowsPrivacy {
 
     Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' `
         -Name 'SubscribedContent-353696Enabled' -Value 0 `
-        Description "Disable additional suggestions"
+        -Description "Disable additional suggestions"
 
     # Disable App Notifications
     Set-RegistryValueWithBackup -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\SystemSettings\AccountNotifications' `
@@ -641,6 +641,9 @@ function Show-Menu {
     Write-Host "===========================================" -ForegroundColor Cyan
     Write-Host "Using hagezi's Windows/Office blocklist" -ForegroundColor DarkCyan
     Write-Host "https://github.com/hagezi" -ForegroundColor DarkCyan
+    Write-Host
+    Write-Host "Created by Herr Täubler" -ForegroundColor DarkCyan
+    Write-Host "https://github.com/HerrTaeubler/Win11-privacy-tool" -ForegroundColor DarkGrey
     Write-Host "===========================================" -ForegroundColor Cyan
     Write-Host "[1] Restrict Windows Update Delivery Optimization" -ForegroundColor White
     Write-Host "[2] Enable Hosts File Blocking" -ForegroundColor White
@@ -655,10 +658,7 @@ function Show-Menu {
     
     Write-Host "Select an option (1-7): " -ForegroundColor White -NoNewline
     $choice = Read-Host
-
-    Write-Host "Created by Herr Täubler" -ForegroundColor DarkCyan
-    Write-Host "https://github.com/HerrTaeubler/Win11-privacy-tool" -ForegroundColor DarkGrey
-    
+   
     if ($choice -in @('3','4','5')) {
         $createRestorePoint = Read-Host "Create system restore point before making changes? (y/N)"
         if ($createRestorePoint -eq 'y') {
