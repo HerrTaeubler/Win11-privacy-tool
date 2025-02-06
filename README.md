@@ -44,7 +44,7 @@ The tool automatically downloads and uses hagezi's Windows/Office blocklist to p
 - Automatically blocks known tracking and telemetry domains
 - Creates backups of your existing hosts file
 - Updates DNS cache after modifications
-- Adds over 100,000 known tracking domains to your hosts file
+
 
 The blocklist is sourced from: https://github.com/hagezi/dns-blocklists
 
