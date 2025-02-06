@@ -38,9 +38,15 @@ Open PowerShell as administrator and run the following command:
 - Limits upload bandwidth
 
 ### Host File Blocking
-- Blocks known telemetry and tracking domains
-- Creates automatic backup of hosts file
-- Includes comprehensive list of Microsoft telemetry endpoints
+The tool automatically downloads and uses hagezi's Windows/Office blocklist to protect your privacy. This feature:
+
+- Downloads the latest version of hagezi's curated blocklist
+- Automatically blocks known tracking and telemetry domains
+- Creates backups of your existing hosts file
+- Updates DNS cache after modifications
+- Adds over 100,000 known tracking domains to your hosts file
+
+The blocklist is sourced from: https://github.com/hagezi/dns-blocklists
 
 ### Privacy Settings
 - Disables telemetry collection
