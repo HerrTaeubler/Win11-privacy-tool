@@ -8,7 +8,7 @@ This tool aims to restrict Windows' data collection and telemetry as much as pos
 
 ## Features
 - Restriction of Windows Update Delivery Optimization
-- Blocking of telemetry and tracking domains via hosts file
+- Block telemetry and tracking domains using hagezi's blocklist
 - Comprehensive Windows privacy settings optimization
 - Enhanced Windows Search privacy controls
 - Dedicated App Permissions Management
@@ -99,6 +99,9 @@ MIT License
 
 ## Author
 Herr Täubler
+
+## Credits
+Using hagezi's Windows/Office blocklist (https://github.com/hagezi)
 
 ## Disclaimer
 Use this script at your own risk. While efforts have been made to ensure safe operation, I am not responsible for any potential issues that may arise from using this script.
