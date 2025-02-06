@@ -506,7 +506,8 @@ function Set-DeliveryOptimization {
 # Hosts File Management
 function Update-HostsFile {
     param (
-        [string[]]$BlockDomains,
+        [string]$HageziUrl = "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/hosts/native.winoffice.txt",
+        [string[]]$AdditionalDomains = @(),
         [switch]$IncludeWildcards = $true
     )
     
@@ -515,24 +516,41 @@ function Update-HostsFile {
     $tempHostsPath = "$env:TEMP\hosts.tmp"
     
     try {
-        # Create backup
-        Copy-Item -Path $hostsPath -Destination $backupPath -Force
-        Write-Log "Hosts file backup created: $backupPath" -Level 'Info'
-        
-        # Read current content with file lock handling
-        try {
-            $currentContent = [System.IO.File]::ReadAllText($hostsPath)
+        # Create hosts file if it doesn't exist
+        if (-not (Test-Path $hostsPath)) {
+            Write-Log "Creating new hosts file..." -Level 'Info'
+            New-Item -ItemType File -Path $hostsPath -Force | Out-Null
         }
-        catch {
-            Start-Sleep -Seconds 1
-            $currentContent = [System.IO.File]::ReadAllText($hostsPath)
+
+        # Create backup only if original file exists and has content
+        if ((Test-Path $hostsPath) -and (Get-Item $hostsPath).Length -gt 0) {
+            Copy-Item -Path $hostsPath -Destination $backupPath -Force
+            Write-Log "Hosts file backup created: $backupPath" -Level 'Info'
         }
         
-        if (-not $currentContent) { $currentContent = "" }
+        # Download Hagezi's blocklist
+        Write-Log "Downloading Hagezi's blocklist..." -Level 'Info'
+        $webClient = New-Object System.Net.WebClient
+        $hageziContent = $webClient.DownloadString($HageziUrl)
+        
+        # Parse domains from Hagezi's list
+        $hageziDomains = $hageziContent -split "`n" | Where-Object {
+            $_ -match '^0\.0\.0\.0\s+(.+)$'
+        } | ForEach-Object {
+            ($_ -split '\s+')[1]
+        }
+        
+        Write-Log "Downloaded ${hageziDomains.Count} domains from Hagezi's list" -Level 'Info'
+        
+        # Combine with additional domains
+        $allDomains = @($hageziDomains) + $AdditionalDomains
+        $allDomains = $allDomains | Select-Object -Unique
         
         # Prepare new entries
         $newEntries = @(
             "# Windows 11 Privacy Optimization - $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+            "# Using Hagezi's Windows/Office Tracker Blocklist"
+            "# Source: $HageziUrl"
             "# Last updated: $(Get-Date)"
             ""
             "# localhost entries"
@@ -543,7 +561,7 @@ function Update-HostsFile {
         )
 
         # Process domains
-        foreach ($domain in $BlockDomains) {
+        foreach ($domain in $allDomains) {
             if ($domain -match '^\*') {
                 if ($IncludeWildcards) {
                     $baseDomain = $domain.TrimStart('*.')
@@ -552,27 +570,11 @@ function Update-HostsFile {
                 }
             } else {
                 $newEntries += "0.0.0.0 $domain"
-                if ($domain -notmatch '^www\.') {
-                    $newEntries += "0.0.0.0 www.$domain"
-                }
             }
         }
         
-        # Clean existing entries but keep custom ones
-        $cleanedContent = $currentContent -split "`n" | Where-Object {
-            $_ -notmatch "^0\.0\.0\.0" -and
-            $_ -notmatch "# Windows 11 Privacy Optimization" -and
-            $_ -match '\S'
-        }
-        
-        # Combine content
-        $newContent = @(
-            $cleanedContent
-            ""
-            $newEntries
-        ) -join "`n"
-        
-        # Write to temp file first
+        # Write content directly to temp file
+        $newContent = $newEntries -join "`n"
         [System.IO.File]::WriteAllText($tempHostsPath, $newContent, [System.Text.Encoding]::ASCII)
         
         # Copy temp file to hosts with elevated privileges
@@ -586,7 +588,7 @@ function Update-HostsFile {
         ipconfig /flushdns | Out-Null
         Write-Log "DNS cache flushed" -Level 'Info'
         
-        Write-Log "Hosts file successfully updated with $(($BlockDomains).Count) domains" -Level 'Info'
+        Write-Log "Hosts file successfully updated with $($allDomains.Count) domains" -Level 'Info'
         return $true
     }
     catch {
@@ -637,7 +639,9 @@ function Show-Menu {
     Write-Host "===========================================" -ForegroundColor Cyan
     Write-Host "         Windows 11 Privacy Tool          " -ForegroundColor Cyan
     Write-Host "===========================================" -ForegroundColor Cyan
-    Write-Host
+    Write-Host "Using hagezi's Windows/Office blocklist" -ForegroundColor DarkCyan
+    Write-Host "https://github.com/hagezi" -ForegroundColor DarkCyan
+    Write-Host "===========================================" -ForegroundColor Cyan
     Write-Host "[1] Restrict Windows Update Delivery Optimization" -ForegroundColor White
     Write-Host "[2] Enable Hosts File Blocking" -ForegroundColor White
     Write-Host "[3] Optimize Windows Privacy Settings" -ForegroundColor White
@@ -647,11 +651,13 @@ function Show-Menu {
     Write-Host "    └─ Only reverts changes made in this session" -ForegroundColor Yellow
     Write-Host "[7] Exit" -ForegroundColor White
     Write-Host
-    Write-Host "Created by Herr Täubler" -ForegroundColor DarkCyan
     Write-Host 
     
     Write-Host "Select an option (1-7): " -ForegroundColor White -NoNewline
     $choice = Read-Host
+
+    Write-Host "Created by Herr Täubler" -ForegroundColor DarkCyan
+    Write-Host "https://github.com/HerrTaeubler/Win11-privacy-tool" -ForegroundColor DarkGrey
     
     if ($choice -in @('3','4','5')) {
         $createRestorePoint = Read-Host "Create system restore point before making changes? (y/N)"
@@ -681,77 +687,6 @@ if (-not $compatibility.IsWindows11) {
     Write-Log "WARNING: This script is optimized for Windows 11. Some features might not work correctly on your system." -Level 'Warning'
 }
 
-# List of domains to block
-$domains = @(
-    'telemetry.microsoft.com',
-    'vortex.data.microsoft.com',
-    'vortex-win.data.microsoft.com',
-    'telecommand.telemetry.microsoft.com',
-    'telecommand.telemetry.microsoft.com.nsatc.net',
-    'oca.telemetry.microsoft.com',
-    'sqm.telemetry.microsoft.com',
-    'watson.telemetry.microsoft.com',
-    'redir.metaservices.microsoft.com',
-    'choice.microsoft.com',
-    'choice.microsoft.com.nstac.net',
-    'df.telemetry.microsoft.com',
-    'reports.wes.df.telemetry.microsoft.com',
-    'services.wes.df.telemetry.microsoft.com',
-    'sqm.df.telemetry.microsoft.com',
-    'telemetry.appex.bing.net',
-    'telemetry.urs.microsoft.com',
-    'telemetry.appex.bing.net:443',
-    'settings-sandbox.data.microsoft.com',
-    'vortex-sandbox.data.microsoft.com',
-    'survey.watson.microsoft.com',
-    'watson.ppe.telemetry.microsoft.com',
-    'watson.microsoft.com',
-    'connectivitycheck.microsoft.com',
-    'customer.microsoft.com',
-    'diagnostic.microsoft.com'
-
-    # Additional Microsoft Services
-    'activation.sls.microsoft.com',
-    'licensing.mp.microsoft.com',
-    'activation-v2.sls.microsoft.com',
-    'delivery.mp.microsoft.com',
-    'dl.delivery.mp.microsoft.com',
-    'msedge.api.cdp.microsoft.com',
-    
-    # Bing Related
-    'www.bing.com',
-    'bing.com',
-    'r.bing.com',
-    'bingapis.com',
-    
-    # Additional Tracking
-    'browser.events.data.microsoft.com',
-    'browser.events.data.msn.com',
-    'activity.windows.com',
-    'bingapis.com',
-    'data.microsoft.com',
-    'edge.activity.windows.com',
-    'edge.microsoft.com',
-    'in.appcenter.ms',
-    'msedge.net',
-    
-    # Advertising
-    'ads.microsoft.com',
-    'adserver.bing.com',
-    'advertise.bingads.microsoft.com',
-    'go.microsoft.com',
-    'msn.com',
-    'msnbc.com',
-    'c.msn.com',
-    'ads*.msn.com',
-    
-    # Analytics
-    'analytics.microsoft.com',
-    'analytics.msn.com',
-    'applicationinsights.microsoft.com',
-    'mobile.pipe.aria.microsoft.com'
-)
-
 do {
     $choice = Show-Menu
   
@@ -772,7 +707,7 @@ do {
                 $proceed = Read-Host "Current hosts file will be modified. Continue? (y/N)"
                 
                 if ($proceed -eq 'y') {
-                    if (Update-HostsFile -BlockDomains $domains) {
+                    if (Update-HostsFile) {
                         Write-Log "Hosts file successfully updated" -Level 'Info'
                     } else {
                         Write-Log "Failed to update hosts file" -Level 'Error'
@@ -785,13 +720,14 @@ do {
                 $proceed = Read-Host "Create new hosts file? (y/N)"
                 
                 if ($proceed -eq 'y') {
-                    if (Update-HostsFile -BlockDomains $domains) {
+                    if (Update-HostsFile) {
                         Write-Log "New hosts file created successfully" -Level 'Info'
                     } else {
                         Write-Log "Failed to create hosts file" -Level 'Error'
                     }
                 }
             }
+        
         }
         3 { 
             $featureAvailability = Test-PrivacyFeatureAvailability -Compatibility $compatibility
@@ -806,7 +742,7 @@ do {
             Set-DeliveryOptimization
             Set-WindowsPrivacy
             Set-AppPermissions
-            Update-HostsFile -BlockDomains $domains
+            Update-HostsFile 
         }
         6 {
             Write-Log "Restoring backup values..." -Level 'Info'
