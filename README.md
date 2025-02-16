@@ -23,6 +23,10 @@ A comprehensive PowerShell script to enhance and manage privacy settings in Wind
 - ⚡ Easy to Use Interface
 - 🔄 Reversible Changes
 
+## 📸 Preview
+
+!(Screenshots/Win11-privacy-tool-png)
+
 ## Quick Start
 
 ### Installation
