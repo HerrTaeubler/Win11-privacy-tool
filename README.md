@@ -4,6 +4,7 @@
 ![PowerShell](https://img.shields.io/badge/PowerShell-%235391FE.svg?style=flat&logo=powershell&logoColor=white)
 ![Windows](https://img.shields.io/badge/Windows-0078D6?style=flat&logo=windows&logoColor=white)
 ![GitHub last commit](https://img.shields.io/github/last-commit/HerrTaeubler/Win11-privacy-tool)
+
 A comprehensive PowerShell script to enhance and manage privacy settings in Windows 11, providing a balanced approach between privacy and functionality.
 
 ## Features
