@@ -54,6 +54,36 @@ function Test-SystemCompatibility {
         IsProEdition = $edition -match "Pro|Enterprise|Education"
         Is24H2 = $build -ge 24000
     }
+
+    # Windows 11 Check
+    if (-not $compatibility.IsWindows11) {
+        Write-Log "ERROR: This tool requires Windows 11." -Level 'Error'
+        exit 1
+    }
+
+    # Home Edition Warning
+    if (-not $compatibility.IsProEdition) {
+        Write-Host "`n=== Windows Home Edition Notice ===" -ForegroundColor Yellow
+        Write-Log "WARNING: You are running Windows Home Edition. Some features might not be available or may require Pro/Enterprise edition." -Level 'Warning'
+        Write-Log "Affected features may include:" -Level 'Warning'
+        Write-Log "- Group Policy settings" -Level 'Warning'
+        Write-Log "- Advanced security features" -Level 'Warning'
+        Write-Log "- Enterprise management capabilities" -Level 'Warning'
+        Write-Host "==================================`n" -ForegroundColor Yellow
+        
+        do {
+            $continue = Read-Host "Do you want to continue anyway? (Y/N)"
+            if ($continue -match '^[YyNn]$') {
+                break
+            }
+            Write-Host "Invalid input. Please enter 'Y' or 'N'" -ForegroundColor Red
+        } while ($true)
+
+        if ($continue -notmatch '^[Yy]$') {
+            Write-Log "Operation cancelled by user" -Level 'Info'
+            exit 0
+        }
+    }
     
     return $compatibility
 }
