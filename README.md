@@ -72,10 +72,7 @@ Open PowerShell as administrator and run:
 
 ## Compatibility
 
-Optimized for Windows 11, with special handling for different builds:
-- Full support for Windows 11 24H2
-- Compatible with Windows 11 23H2
-- Basic support for Windows 11 22H2
+Optimized for Windows 11 24H2
 
 ## Credits
 
