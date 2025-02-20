@@ -677,7 +677,7 @@ function Show-Menu {
     Clear-Host
     $border = '==========================================='
     $title = '         Windows 11 Privacy Tool          
-                        v 1.0 '
+                        v 1.2.0 '
     Write-Host $border -ForegroundColor Cyan
     Write-Host $title -ForegroundColor Cyan
     Write-Host $border -ForegroundColor Cyan
