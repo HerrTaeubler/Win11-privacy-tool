@@ -256,10 +256,6 @@ function Set-WindowsPrivacy {
     
     # Windows Search Privacy Settings
     Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search' `
-        -Name 'AllowCortana' -Value 0 `
-        -Description "Disable Cortana in Windows Search"
-
-    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search' `
         -Name 'ConnectedSearchUseWeb' -Value 0 `
         -Description "Disable web search results"
 
