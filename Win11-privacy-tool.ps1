@@ -190,12 +190,8 @@ function Set-WindowsPrivacy {
     
     Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection' `
         -Name 'AllowTelemetry' -Value 0 `
-        -Description "Disable Telemetry Collection"
-    
-    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection' `
-        -Name 'MaxTelemetryAllowed' -Value 0 `
-        -Description "Set Maximum Telemetry Level to Security"
-
+        -Description "Disable Telemetry Collection" 
+  
     Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection' `
         -Name 'DisableEnterpriseAuthProxy' -Value 1 `
         -Description "Disable Enterprise Authentication for Telemetry"
@@ -212,11 +208,7 @@ function Set-WindowsPrivacy {
     # Diagnostic Data Settings
     Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Diagnostics\DiagTrack' `
         -Name 'DiagTrackAuthorization' -Value 0 `
-        -Description "Disable Diagnostic Tracking Authorization"
-
-    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Diagnostics\DiagTrack\EventTranscriptKey' `
-        -Name 'EnableEventTranscript' -Value 0 `
-        -Description "Disable Event Transcript Collection"
+        -Description "Disable Diagnostic Tracking Authorization"   
 
     # Compatibility Telemetry
     Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppCompat' `
@@ -274,6 +266,10 @@ function Set-WindowsPrivacy {
     Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\SearchSettings' `
         -Name 'IsDeviceSearchHistoryEnabled' -Value 0 `
         -Description "Disable search history"
+
+    Set-RegistryValueWithBackup -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\SearchSettings' `
+        -Name 'IsAADCloudSearchEnabled' -Value 0 `
+        -Description "Disable Cloud Search in AAD"
 
     # Disable SafeSearch
     Set-RegistryValueWithBackup -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\SearchSettings' `
@@ -342,19 +338,9 @@ function Set-WindowsPrivacy {
     # Disable Suggested Content in Settings App
     Set-RegistryValueWithBackup -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager' `
         -Name 'SubscribedContent-338393Enabled' -Value 0 `
-        -Description "Disable Suggested Content in Settings"
-       
-    # Disable Search Highlights
-    Set-RegistryValueWithBackup -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\SearchSettings' `
-        -Name 'IsDynamicSearchBoxEnabled' -Value 0 `
-        -Description "Disable Search Highlights"
-
-    # Disable MS Teams Icon
-    Set-RegistryValueWithBackup -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' `
-        -Name 'TaskbarMn' -Value 0 `
-        -Description "Disable Chat Icon"
-
-    # Disable Bing Search in Start Menu
+        -Description "Disable Suggested Content in Settings"    
+   
+     # Disable Bing Search in Start Menu
     Set-RegistryValueWithBackup -Path 'HKCU:\Software\Policies\Microsoft\Windows\Explorer' `
         -Name 'DisableSearchBoxSuggestions' -Value 1 `
         -Description "Disable Bing Search in Start Menu"
@@ -437,6 +423,16 @@ function Set-WindowsPrivacy {
     Set-RegistryValueWithBackup -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\SystemSettings\AccountNotifications' `
         -Name 'EnableAccountNotifications' -Value 0 `
         -Description "Disable Settings App Notifications"
+
+    # Disable Copilot
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot' `
+        -Name 'TurnOffWindowsCopilot' -Value 1 `
+        -Description "Disable Windows Copilot"
+
+    # isable Lock Screen Content
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System' `
+        -Name 'DisableLogonBackgroundImage' -Value 1 `
+        -Description "Disable Dynamic Lock Screen Content"
         
     Write-Log "Windows privacy settings configuration completed" -Level 'Info'        
      
