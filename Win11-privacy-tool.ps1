@@ -429,10 +429,15 @@ function Set-WindowsPrivacy {
         -Name 'TurnOffWindowsCopilot' -Value 1 `
         -Description "Disable Windows Copilot"
 
-    # isable Lock Screen Content
+    # Disable Lock Screen Content
     Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System' `
         -Name 'DisableLogonBackgroundImage' -Value 1 `
         -Description "Disable Dynamic Lock Screen Content"
+
+    # Disable Game DVR and Game Bar
+    Set-RegistryValueWithBackup -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR' `
+        -Name 'AllowGameDVR' -Value 0 `
+        -Description "Disable Game DVR"
         
     Write-Log "Windows privacy settings configuration completed" -Level 'Info'        
      
