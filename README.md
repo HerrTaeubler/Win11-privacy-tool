@@ -1,4 +1,4 @@
-# Windows 11 Privacy Optimizer v 1.0   
+# Windows 11 Privacy Optimizer v 1.2.0   
 
 ![License: MIT](https://img.shields.io/github/license/HerrTaeubler/Win11-privacy-tool)
 ![PowerShell](https://img.shields.io/badge/PowerShell-%235391FE.svg?style=flat&logo=powershell&logoColor=white)
